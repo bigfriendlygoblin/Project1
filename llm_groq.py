@@ -1,6 +1,6 @@
 import requests
 
-GROQ_API_KEY = "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"  # Replace with environment variable in production
+GROQ_API_KEY = "xx"  # Replace with environment variable in production
 API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 def query_groq_mistral(system_msg, user_msg):
