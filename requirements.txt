@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+requests
+pydantic
+python-multipart
+pillow
+numpy
+faiss-cpu
+tqdm
+nomic
+python-dotenv
