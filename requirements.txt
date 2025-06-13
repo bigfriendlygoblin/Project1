@@ -10,7 +10,5 @@ tqdm
 nomic
 python-dotenv
 pytesseract
-open_clip
-io
-base64
+open-clip-torch
 torch
