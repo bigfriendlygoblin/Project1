@@ -9,3 +9,4 @@ faiss-cpu
 tqdm
 nomic
 python-dotenv
+pytesseract
