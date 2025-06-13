@@ -5,8 +5,8 @@ import faiss
 import json
 
 # Load index and metadata
-index = faiss.read_index("vectorstore/tds_index.faiss")
-with open("vectorstore/tds_metadata.json", "r", encoding="utf-8") as f:
+index = faiss.read_index("app/vectorstore/tds_index.faiss")
+with open("app/vectorstore/tds_metadata.json", "r", encoding="utf-8") as f:
     metadata = json.load(f)
 
 def search_similar_chunks(query_embedding: np.ndarray, k=3):
@@ -19,9 +19,9 @@ def search_similar_chunks(query_embedding: np.ndarray, k=3):
     return results
 
 # Assuming these paths
-IMAGE_EMBEDDING_INDEX = "vectorstore/tds_imageembeddings.faiss"
-IMAGE_EMBEDDING_METADATA = "vectorstore/tds_image_metadata.json"
-TEXT_CHUNKS_FILE = "chunks/discourse_chunks.json"
+IMAGE_EMBEDDING_INDEX = "app/vectorstore/tds_imageembeddings.faiss"
+IMAGE_EMBEDDING_METADATA = "app/vectorstore/tds_image_metadata.json"
+TEXT_CHUNKS_FILE = "app/chunks/discourse_chunks.json"
 
 # Load index and metadata once (you can optimize with lazy loading)
 image_index = faiss.read_index(IMAGE_EMBEDDING_INDEX)
