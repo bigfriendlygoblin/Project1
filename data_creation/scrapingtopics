@@ -1,0 +1,110 @@
+from playwright.sync_api import sync_playwright
+import json
+import os
+import time
+from datetime import datetime
+
+# ==== CONFIG ====
+URL = "https://discourse.onlinedegree.iitm.ac.in/c/courses/tds-kb/34"
+COOKIES_FILE = "cookies.json"
+OUTPUT_FILE = "filtered_topics.json"
+START_DATE = datetime(2024, 12, 30).date()
+END_DATE = datetime(2025, 4, 15).date()
+SCROLL_DELAY = 2
+
+# ==== UTILITIES ====
+def save_cookies(context):
+    cookies = context.cookies()
+    with open(COOKIES_FILE, "w") as f:
+        json.dump(cookies, f)
+    print("💾 Cookies saved.")
+
+def load_cookies(context):
+    if os.path.exists(COOKIES_FILE):
+        with open(COOKIES_FILE, "r") as f:
+            cookies = json.load(f)
+        context.add_cookies(cookies)
+        print("✅ Loaded existing cookies for session.")
+
+def wait_for_user_login():
+    input("⏸️  Please log in manually, then press ENTER to start scraping...")
+
+# ==== SCRAPE FUNCTION ====
+def scrape():
+    with sync_playwright() as p:
+        browser = p.chromium.launch_persistent_context(user_data_dir="user_data", headless=False)
+        page = browser.new_page()
+
+        load_cookies(browser)
+        print(f"🔄 Loading topics from {URL}")
+        page.goto(URL)
+
+        wait_for_user_login()
+
+        all_topics = []
+        seen_ids = set()
+        stop_scroll = False
+
+        while not stop_scroll:
+            page.wait_for_selector("tr.topic-list-item", timeout=15000)
+            topic_rows = page.query_selector_all("tr.topic-list-item")
+            print(f"🔽 Fetched {len(topic_rows)} topics so far")
+
+            for row in topic_rows:
+                try:
+                    title_elem = row.query_selector("a.title")
+                    href = title_elem.get_attribute("href")
+                    title = title_elem.inner_text().strip()
+                    topic_id = row.get_attribute("data-topic-id") or href.split("/")[2]
+
+                    # Extract datetime from activity column
+                    time_elem = row.query_selector("td.activity span.relative-date")
+                    data_time = time_elem.get_attribute("data-time")
+                    topic_datetime = datetime.utcfromtimestamp(int(data_time) / 1000.0)
+                    topic_date = topic_datetime.date()
+
+                    if START_DATE <= topic_date <= END_DATE:
+                        if topic_id not in seen_ids:
+                            all_topics.append({
+                                "id": topic_id,
+                                "title": title,
+                                "link": f"https://discourse.onlinedegree.iitm.ac.in{href}",
+                                "date": topic_date.isoformat()
+                            })
+                            seen_ids.add(topic_id)
+
+                except Exception as e:
+                    print(f"⚠️ Skipping a row due to error: {e}")
+
+            print(f"✅ Found {len(seen_ids)} matching topics so far.")
+
+            # Check if we should stop scrolling
+            if topic_rows:
+                last_row = topic_rows[-1]
+                time_elem = last_row.query_selector("td.activity span.relative-date")
+                if time_elem:
+                    data_time = time_elem.get_attribute("data-time")
+                    if data_time:
+                        topic_datetime = datetime.utcfromtimestamp(int(data_time) / 1000.0)
+                        topic_date = topic_datetime.date()
+                        print(f"🧪 Oldest visible topic date: {topic_date}")
+                        if topic_date < START_DATE:
+                            print(f"🛑 Reached topic from {topic_date}, stopping scroll.")
+                            stop_scroll = True
+
+            # Scroll down
+            page.keyboard.press("End")
+            time.sleep(SCROLL_DELAY)
+
+        # Save results
+        print(f"📦 Total filtered topics collected: {len(all_topics)}")
+        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+            json.dump(all_topics, f, indent=2)
+        print(f"✅ Data written to {OUTPUT_FILE}")
+
+        save_cookies(browser)
+        browser.close()
+
+# ==== MAIN ====
+if __name__ == "__main__":
+    scrape()
