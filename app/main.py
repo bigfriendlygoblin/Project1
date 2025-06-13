@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import numpy as np
-from vector_search import search_similar_chunks, search_similar_image, get_chunks_by_topic_id
-from llm_groq import query_groq_mistral
+from app.vector_search import search_similar_chunks, search_similar_image, get_chunks_by_topic_id
+from app.llm_groq import query_groq_mistral
 from nomic import embed
 from PIL import Image
 import io
