@@ -1,10 +1,15 @@
 import requests
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 API_URL = "https://api.groq.com/openai/v1/chat/completions"
+API_KEY=os.getenv("GROQ_API_KEY")
 
 def query_groq_mistral(system_msg, user_msg):
     headers = {
-        "Authorization": "Bearer GROQ_API_KEY",
+        "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
     }
 
