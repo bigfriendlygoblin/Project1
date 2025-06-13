@@ -10,8 +10,6 @@ tqdm
 nomic
 python-dotenv
 pytesseract
-os
-json
 open_clip
 io
 base64
