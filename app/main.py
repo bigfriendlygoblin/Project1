@@ -11,6 +11,7 @@ import pytesseract
 import torch
 import open_clip
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 pytesseract.pytesseract.tesseract_cmd = "tesseract"
 
@@ -25,6 +26,14 @@ nomic_embedder = NomicEmbeddings(
 )
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or set to your frontend domain like ["https://your-frontend.com"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class QueryRequest(BaseModel):
     question: str
