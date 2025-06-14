@@ -7,7 +7,7 @@ pillow
 numpy
 faiss-cpu
 tqdm
-nomic
+langchain-nomic>=0.0.3
 python-dotenv
 pytesseract
 open-clip-torch
