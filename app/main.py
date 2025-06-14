@@ -14,8 +14,8 @@ import open_clip
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 # Load CLIP model and preprocess
-clip_model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-32', pretrained='openai')
-clip_tokenizer = open_clip.get_tokenizer('ViT-B-32')
+clip_model, _, preprocess = open_clip.create_model_and_transforms('ViT-S-14', pretrained='laion2b_s34b_b88k')
+clip_tokenizer = open_clip.get_tokenizer('ViT-S-14')
 
 app = FastAPI()
 
