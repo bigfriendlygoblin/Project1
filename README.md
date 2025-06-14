@@ -13,11 +13,11 @@ Send POST requests with a student question and (optionally) a base64-encoded ima
 
 ### POST request format:
 
-`POST https://tds-service-498040420684.asia-south1.run.app`
+`POST https://tds-service-498040420684.asia-south1.run.app/ask`
 
 ### Example using curl:
 ```bash
-curl "https://tds-service-498040420684.asia-south1.run.app" \
+curl "https://tds-service-498040420684.asia-south1.run.app/ask" \
   -H "Content-Type: application/json" \
   -d '{
     "question": "Should I use gpt-4o-mini which AI proxy supports, or gpt3.5 turbo?",
