@@ -81,7 +81,7 @@ LICENSE                     # MIT License
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/askmi.git
+git clone https://github.com/bigfriendlygoblin/Project1.git
 cd askmi
 pip install -r requirements.txt
 ```
