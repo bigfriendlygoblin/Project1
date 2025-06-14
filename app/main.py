@@ -3,22 +3,26 @@ from pydantic import BaseModel
 import numpy as np
 from app.vector_search import search_similar_chunks, search_similar_image, get_chunks_by_topic_id
 from app.llm_groq import query_groq_mistral
-from nomic import embed
+from langchain_nomic import NomicEmbeddings
 from PIL import Image
 import io
 import base64
 import pytesseract
 import torch
 import open_clip
+import os
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = "tesseract"
 
 # Load CLIP model and preprocess
-clip_model, _, preprocess = open_clip.create_model_and_transforms(
-    'RN50',
-    pretrained='openai'
-)
+clip_model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-32', pretrained='openai')
+clip_tokenizer = open_clip.get_tokenizer('ViT-B-32')
 
+# Initialize Nomic Embeddings (API key picked up from env var)
+nomic_embedder = NomicEmbeddings(
+    model="nomic-embed-text-v1.5",
+    dimensionality=256
+)
 
 app = FastAPI()
 
@@ -53,7 +57,7 @@ def ask_question(request: QueryRequest):
             print("Closest image topic:", topic_id)
 
             if topic_id:
-                extra_chunks = get_chunks_by_topic_id(topic_id)
+                extra_chunks = get_chunks_by_topic_id(topic_ids[0])
 
         except Exception as e:
             print(f"Image processing failed: {e}")
@@ -64,8 +68,13 @@ def ask_question(request: QueryRequest):
         combined_text += "\n\nExtracted from image:\n" + ocr_text.strip()
 
     # Embed and search using text
-    embedding = embed.text([combined_text], model="nomic-embed-text-v1")["embeddings"]
-    embedding = np.array(embedding).astype("float32")
+    try:
+        embedding = nomic_embedder.embed_query(combined_text)
+    except Exception as e:
+        print(f"Nomic Embedding Error: {e}")
+        raise
+
+    embedding = np.array(embedding, dtype="float32").reshape(1, -1)
 
     semantic_chunks = search_similar_chunks(embedding, k=3)
 
@@ -82,7 +91,11 @@ def ask_question(request: QueryRequest):
         for c in all_chunks
     )
 
-    system_msg = "You are a helpful teaching assistant for the TDS course. Use the given content to provide a concise, HELPFUL answer. If using discourse data, look for answers by the course TA Jivraj."
+    system_msg = (
+        "You are a helpful teaching assistant for the TDS course. "
+        "Use the given content to provide a concise, HELPFUL answer.If some information is not available, say you don't know. "
+        "If using discourse data, look for answers by the course TA Jivraj."
+    )
     user_msg = f"Context:\n{context}\n\nQuery: {question}"
 
     answer = query_groq_mistral(system_msg, user_msg)
