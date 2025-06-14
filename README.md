@@ -3,7 +3,7 @@
 **Askmi** is an API-based virtual teaching assistant that answers student queries using scraped course content and forum discussions. It uses both text and image embeddings to retrieve the most relevant material and generate concise answers using Groq's **LLaMA 3 7B Versatile** model.
 
 **Live Endpoint**:  
-`https://tds-service-498040420684.asia-south1.run.app`
+`https://tds-service-498040420684.asia-south1.run.app/ask`
 
 Send POST requests with a student question and (optionally) a base64-encoded image file as JSON.
 
